@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -33,9 +33,9 @@ public class TodoService {
     }
 
     @Transactional(readOnly = true)
-    public List<TodoResponse> findTodos(@RequestParam(required = false) String username) {
+    public List<TodoResponse> findTodos(String username) {
         List<Todo> todos;
-        if(username != null && !username.isEmpty()){
+        if(StringUtils.hasText(username)){
             todos = todoRepository.findByUsernameOrderByModifiedAtDesc(username);
         } else{
             todos = todoRepository.findAll(Sort.by(Sort.Direction.DESC, "modifiedAt"));
@@ -54,9 +54,7 @@ public class TodoService {
 
     @Transactional(readOnly = true)
     public TodoResponse findTodo(Long todoId){
-        Todo todo = todoRepository.findById(todoId).orElseThrow(
-                () -> new IllegalArgumentException("TodoId not found!")
-        );
+        Todo todo = findTodoById(todoId);
         return new TodoResponse(
                 todo.getId(),
                 todo.getTitle(),
@@ -69,12 +67,7 @@ public class TodoService {
 
     @Transactional
     public TodoResponse updateTodo(Long todoId, TodoRequest request) {
-        Todo todo = todoRepository.findById(todoId).orElseThrow(
-                () -> new IllegalArgumentException("TodoId not found!")
-        );
-        if(!todo.getPassword().equals(request.getPassword())){
-            throw new IllegalArgumentException("비밀번호가 틀렸습니다!");
-        }
+        Todo todo = findTodoById(todoId);
         todo.updateTodo(request.getTitle(), request.getUsername());
         return new TodoResponse(
                 todo.getId(),
@@ -88,11 +81,16 @@ public class TodoService {
 
     @Transactional
     public void deleteTodo(Long todoId){
-        boolean b = todoRepository.existsById(todoId);
-        if(!b) {
-            throw new IllegalArgumentException("Todo not found!");
+        if(!todoRepository.existsById(todoId)){
+            throw new IllegalArgumentException("TodoId not found!");
         }
         todoRepository.deleteById(todoId);
+    }
+
+    private Todo findTodoById(Long todoId){
+        return todoRepository.findById(todoId).orElseThrow(
+                () -> new IllegalArgumentException("TodoId not found!")
+        );
     }
 
 }
