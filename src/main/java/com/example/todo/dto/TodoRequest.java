@@ -8,6 +8,4 @@ import lombok.NoArgsConstructor;
 public class TodoRequest {
     private String title;
     private String content;
-    private String username;
-    private String password;
 }

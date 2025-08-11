@@ -9,23 +9,24 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Todo extends BaseEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String title;
     private String content;
-    private String username;
-    private String password;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private Users users;
 
 
-    public Todo(String title, String content, String username, String password) {
+    public Todo(String title, String content, Users users) {
         this.title = title;
         this.content = content;
-        this.username = username;
-        this.password = password;
+        this.users = users;
     }
 
-    public void updateTodo(String title, String author) {
+    public void update(String title, String content) {
         this.title = title;
-        this.username = author;
+        this.content = content;
     }
 }

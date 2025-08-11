@@ -3,93 +3,87 @@ package com.example.todo.service;
 import com.example.todo.dto.TodoRequest;
 import com.example.todo.dto.TodoResponse;
 import com.example.todo.entity.Todo;
+import com.example.todo.entity.Users;
 import com.example.todo.repository.TodoRepository;
+import com.example.todo.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
 public class TodoService {
     private final TodoRepository todoRepository;
+    private final UsersRepository usersRepository;
 
     @Transactional
-    public TodoResponse save(TodoRequest request) {
-        Todo todo = new Todo(request.getTitle(), request.getContent(), request.getUsername(), request.getPassword());
+    public TodoResponse save(TodoRequest request, Long usersId) {
+        Users users = usersRepository.findById(usersId).orElseThrow(
+                () -> new IllegalArgumentException("사용자를 찾을 수 없습니다.")
+        );
+        Todo todo = new Todo(request.getTitle(), request.getContent(), users);
         Todo savedTodo = todoRepository.save(todo);
 
-        return new TodoResponse(
-                savedTodo.getId(),
-                savedTodo.getTitle(),
-                savedTodo.getContent(),
-                savedTodo.getUsername(),
-                savedTodo.getCreatedAt(),
-                savedTodo.getModifiedAt()
-        );
+        return new TodoResponse(savedTodo);
     }
 
     @Transactional(readOnly = true)
-    public List<TodoResponse> findTodos(String username) {
-        List<Todo> todos;
-        if(StringUtils.hasText(username)){
-            todos = todoRepository.findByUsernameOrderByModifiedAtDesc(username);
-        } else{
-            todos = todoRepository.findAll(Sort.by(Sort.Direction.DESC, "modifiedAt"));
-        }
-        return todos.stream()
-                .map(todo -> new TodoResponse(
-                        todo.getId(),
-                        todo.getTitle(),
-                        todo.getContent(),
-                        todo.getUsername(),
-                        todo.getCreatedAt(),
-                        todo.getModifiedAt()
-                ))
+    public List<TodoResponse> getTodosByUser(Long userId) {
+        Users user = findUserById(userId);
+        return todoRepository.findByUsersOrderByModifiedAtDesc(user)
+                .stream()
+                .map(TodoResponse::new)
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public TodoResponse findTodo(Long todoId){
+    public List<TodoResponse> getAllTodos() {
+        return todoRepository.findAll(Sort.by(Sort.Direction.DESC, "modifiedAt"))
+                .stream()
+                .map(TodoResponse::new)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public TodoResponse getTodo(Long todoId){
         Todo todo = findTodoById(todoId);
-        return new TodoResponse(
-                todo.getId(),
-                todo.getTitle(),
-                todo.getContent(),
-                todo.getUsername(),
-                todo.getCreatedAt(),
-                todo.getModifiedAt()
-        );
+        return new TodoResponse(todo);
     }
 
     @Transactional
-    public TodoResponse updateTodo(Long todoId, TodoRequest request) {
+    public TodoResponse updateTodo(Long todoId, TodoRequest request, Long usersId) {
         Todo todo = findTodoById(todoId);
-        todo.updateTodo(request.getTitle(), request.getUsername());
-        return new TodoResponse(
-                todo.getId(),
-                todo.getTitle(),
-                todo.getContent(),
-                todo.getUsername(),
-                todo.getCreatedAt(),
-                todo.getModifiedAt()
-        );
-    }
-
-    @Transactional
-    public void deleteTodo(Long todoId){
-        if(!todoRepository.existsById(todoId)){
-            throw new IllegalArgumentException("TodoId not found!");
+        if (!Objects.equals(todo.getUsers().getId(), usersId)) {
+            throw new IllegalArgumentException("작성자만 수정할 수 있습니다.");
         }
-        todoRepository.deleteById(todoId);
+        todo.update(request.getTitle(), request.getContent());
+
+        return new TodoResponse(todo);
+    }
+
+    @Transactional
+    public void deleteTodo(Long todoId, Long usersId){
+        Todo todo = findTodoById(todoId);
+        if (!Objects.equals(todo.getUsers().getId(), usersId)) {
+            throw new IllegalArgumentException("작성자만 삭제할 수 있습니다.");
+        }
+
+        todoRepository.delete(todo);
     }
 
     private Todo findTodoById(Long todoId){
         return todoRepository.findById(todoId).orElseThrow(
                 () -> new IllegalArgumentException("TodoId not found!")
+        );
+    }
+
+    private Users findUserById(Long userId) {
+        return usersRepository.findById(userId).orElseThrow(() ->
+                new IllegalArgumentException("선택한 유저는 존재하지 않습니다.")
         );
     }
 

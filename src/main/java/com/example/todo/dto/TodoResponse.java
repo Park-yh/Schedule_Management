@@ -1,5 +1,6 @@
 package com.example.todo.dto;
 
+import com.example.todo.entity.Todo;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
@@ -13,12 +14,12 @@ public class TodoResponse {
     private final LocalDateTime createdAt;
     private final LocalDateTime modifiedAt;
 
-    public TodoResponse(Long id, String title, String content, String username, LocalDateTime createdAt, LocalDateTime modifiedAt){
-        this.id = id;
-        this.title = title;
-        this.content = content;
-        this.username = username;
-        this.createdAt = createdAt;
-        this.modifiedAt = modifiedAt;
+    public TodoResponse(Todo todo){
+        this.id = todo.getId();
+        this.title = todo.getTitle();
+        this.content = todo.getContent();
+        this.username = todo.getUsers().getName();
+        this.createdAt = todo.getCreatedAt();
+        this.modifiedAt = todo.getModifiedAt();
     }
 }
