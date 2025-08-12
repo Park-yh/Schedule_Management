@@ -8,5 +8,5 @@ import java.util.Optional;
 
 public interface UsersRepository extends JpaRepository<Users, Long> {
     List<Users> findByNameOrderByModifiedAtDesc(String name);
-    Optional<Users> findByName(String name);
+    Optional<Users> findByEmail(String email);
 }

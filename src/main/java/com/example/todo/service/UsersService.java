@@ -4,6 +4,9 @@ import com.example.todo.dto.UsersRequest;
 import com.example.todo.dto.UsersResponse;
 import com.example.todo.entity.Users;
 import com.example.todo.repository.UsersRepository;
+import com.example.todo.dto.LoginRequest;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -88,6 +91,20 @@ public class UsersService {
         return usersRepository.findById(usersId).orElseThrow(
                 () -> new IllegalArgumentException("UsersId not found!")
         );
+    }
+
+    @Transactional
+    public void login(LoginRequest request, HttpServletRequest httpServletRequest) {
+        Users user = usersRepository.findByEmail(request.getEmail()).orElseThrow(
+                () -> new IllegalArgumentException("등록된 사용자가 없습니다.")
+        );
+
+        if (!user.getPassword().equals(request.getPassword())) {
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        }
+
+        HttpSession session = httpServletRequest.getSession(true);
+        session.setAttribute("LOGIN_USER", user);
     }
 
 }
