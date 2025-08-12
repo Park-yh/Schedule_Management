@@ -18,17 +18,20 @@ public class Users extends BaseEntity {
     private Long id;
     private String name;
     private String email;
+    private String password;
 
     @OneToMany(mappedBy = "users", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Todo> todos = new ArrayList<>();
 
-    public Users(String name, String email) {
+    public Users(String name, String email, String password) {
         this.name = name;
         this.email = email;
+        this.password = password;
     }
 
-    public void updateUsers(String name, String email){
+    public void updateUsers(String name, String email, String password){
         this.name = name;
         this.email = email;
+        this.password = password;
     }
 }

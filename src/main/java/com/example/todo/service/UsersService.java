@@ -19,7 +19,7 @@ public class UsersService {
 
     @Transactional
     public UsersResponse createUsers(UsersRequest request){
-        Users users = new Users(request.getName(), request.getEmail());
+        Users users = new Users(request.getName(), request.getEmail(), request.getPassword());
         Users savedUsers = usersRepository.save(users);
 
         return new UsersResponse(
@@ -65,7 +65,7 @@ public class UsersService {
     @Transactional
     public UsersResponse updateUsers(Long usersId, UsersRequest request) {
         Users users = findUserById(usersId);
-        users.updateUsers(request.getName(), request.getEmail());
+        users.updateUsers(request.getName(), request.getEmail(), request.getPassword());
 
         return new UsersResponse(
                 users.getId(),
