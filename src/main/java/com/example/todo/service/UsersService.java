@@ -1,5 +1,6 @@
 package com.example.todo.service;
 
+import com.example.todo.config.PasswordEncoder;
 import com.example.todo.dto.UsersRequest;
 import com.example.todo.dto.UsersResponse;
 import com.example.todo.entity.Users;
@@ -19,10 +20,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UsersService {
     private final UsersRepository usersRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     public UsersResponse createUsers(UsersRequest request){
-        Users users = new Users(request.getName(), request.getEmail(), request.getPassword());
+        String encodedPassword = passwordEncoder.encode(request.getPassword());
+        Users users = new Users(request.getName(), request.getEmail(), encodedPassword);
         Users savedUsers = usersRepository.save(users);
 
         return new UsersResponse(
@@ -68,7 +71,8 @@ public class UsersService {
     @Transactional
     public UsersResponse updateUsers(Long usersId, UsersRequest request) {
         Users users = findUserById(usersId);
-        users.updateUsers(request.getName(), request.getEmail(), request.getPassword());
+        String encodedPassword = passwordEncoder.encode(request.getPassword());
+        users.updateUsers(request.getName(), request.getEmail(), encodedPassword);
 
         return new UsersResponse(
                 users.getId(),
@@ -99,7 +103,7 @@ public class UsersService {
                 () -> new IllegalArgumentException("등록된 사용자가 없습니다.")
         );
 
-        if (!user.getPassword().equals(request.getPassword())) {
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
 
