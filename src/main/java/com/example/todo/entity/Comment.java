@@ -4,35 +4,34 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Entity
 @Getter
 @NoArgsConstructor
-public class Todo extends BaseEntity {
+public class Comment extends BaseEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String title;
+
+    @Column(nullable = false)
     private String content;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "todo_id", nullable = false)
+    private Todo todo;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private Users user;
 
-    @OneToMany(mappedBy = "todo", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Comment> comments = new ArrayList<>();
 
-
-    public Todo(String title, String content, Users user) {
-        this.title = title;
+    public Comment(String content, Todo todo, Users user) {
         this.content = content;
+        this.todo = todo;
         this.user = user;
     }
 
-    public void update(String title, String content) {
-        this.title = title;
+    public void updateComment(String content) {
         this.content = content;
     }
 }

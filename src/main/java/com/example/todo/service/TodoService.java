@@ -21,11 +21,11 @@ public class TodoService {
     private final UsersRepository usersRepository;
 
     @Transactional
-    public TodoResponse save(TodoRequest request, Long usersId) {
-        Users users = usersRepository.findById(usersId).orElseThrow(
+    public TodoResponse save(TodoRequest request, Long userId) {
+        Users user = usersRepository.findById(userId).orElseThrow(
                 () -> new IllegalArgumentException("사용자를 찾을 수 없습니다.")
         );
-        Todo todo = new Todo(request.getTitle(), request.getContent(), users);
+        Todo todo = new Todo(request.getTitle(), request.getContent(), user);
         Todo savedTodo = todoRepository.save(todo);
 
         return new TodoResponse(savedTodo);
@@ -34,7 +34,7 @@ public class TodoService {
     @Transactional(readOnly = true)
     public List<TodoResponse> getTodosByUser(Long userId) {
         Users user = findUserById(userId);
-        return todoRepository.findByUsersOrderByModifiedAtDesc(user)
+        return todoRepository.findByUserOrderByModifiedAtDesc(user)
                 .stream()
                 .map(TodoResponse::new)
                 .toList();
@@ -57,7 +57,7 @@ public class TodoService {
     @Transactional
     public TodoResponse updateTodo(Long todoId, TodoRequest request, Long usersId) {
         Todo todo = findTodoById(todoId);
-        if (!Objects.equals(todo.getUsers().getId(), usersId)) {
+        if (!Objects.equals(todo.getUser().getId(), usersId)) {
             throw new IllegalArgumentException("작성자만 수정할 수 있습니다.");
         }
         todo.update(request.getTitle(), request.getContent());
@@ -68,7 +68,7 @@ public class TodoService {
     @Transactional
     public void deleteTodo(Long todoId, Long usersId){
         Todo todo = findTodoById(todoId);
-        if (!Objects.equals(todo.getUsers().getId(), usersId)) {
+        if (!Objects.equals(todo.getUser().getId(), usersId)) {
             throw new IllegalArgumentException("작성자만 삭제할 수 있습니다.");
         }
 
