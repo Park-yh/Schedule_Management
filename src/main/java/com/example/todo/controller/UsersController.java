@@ -4,6 +4,7 @@ import com.example.todo.dto.UsersRequest;
 import com.example.todo.dto.UsersResponse;
 import com.example.todo.service.UsersService;
 import com.example.todo.dto.LoginRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +21,7 @@ public class UsersController {
     private final UsersService usersService;
 
     @PostMapping("/users")
-    public ResponseEntity<UsersResponse> createUsers(@RequestBody UsersRequest request) {
+    public ResponseEntity<UsersResponse> createUsers(@Valid @RequestBody UsersRequest request) {
         return ResponseEntity.ok(usersService.createUsers(request));
     }
 
