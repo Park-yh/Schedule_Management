@@ -1,5 +1,6 @@
 package com.example.todo.dto;
 
+import com.example.todo.entity.Users;
 import lombok.Getter;
 import java.time.LocalDateTime;
 
@@ -11,11 +12,11 @@ public class UsersResponse {
     private final LocalDateTime createdAt;
     private final LocalDateTime modifiedAt;
 
-    public UsersResponse(Long id, String name, String email, LocalDateTime createdAt, LocalDateTime modifiedAt){
-        this.id = id;
-        this.name = name;
-        this.email = email;
-        this.createdAt = createdAt;
-        this.modifiedAt = modifiedAt;
+    public UsersResponse(Users users){
+        this.id = users.getId();
+        this.name = users.getName();
+        this.email = users.getEmail();
+        this.createdAt = users.getCreatedAt();
+        this.modifiedAt = users.getModifiedAt();
     }
 }

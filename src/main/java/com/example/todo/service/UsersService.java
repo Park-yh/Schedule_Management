@@ -28,13 +28,7 @@ public class UsersService {
         Users users = new Users(request.getName(), request.getEmail(), encodedPassword);
         Users savedUsers = usersRepository.save(users);
 
-        return new UsersResponse(
-                savedUsers.getId(),
-                savedUsers.getName(),
-                savedUsers.getEmail(),
-                savedUsers.getCreatedAt(),
-                savedUsers.getModifiedAt()
-        );
+        return new UsersResponse(savedUsers);
     }
 
     @Transactional(readOnly = true)
@@ -46,26 +40,14 @@ public class UsersService {
             users = usersRepository.findAll(Sort.by(Sort.Direction.DESC, "modifiedAt"));
         }
         return users.stream()
-                .map(user -> new UsersResponse(
-                        user.getId(),
-                        user.getName(),
-                        user.getEmail(),
-                        user.getCreatedAt(),
-                        user.getModifiedAt()
-                ))
+                .map(UsersResponse::new)
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public UsersResponse findUser(Long usersId) {
         Users users = findUserById(usersId);
-        return new UsersResponse(
-                users.getId(),
-                users.getName(),
-                users.getEmail(),
-                users.getCreatedAt(),
-                users.getModifiedAt()
-        );
+        return new UsersResponse(users);
     }
 
     @Transactional
@@ -74,13 +56,7 @@ public class UsersService {
         String encodedPassword = passwordEncoder.encode(request.getPassword());
         users.updateUsers(request.getName(), request.getEmail(), encodedPassword);
 
-        return new UsersResponse(
-                users.getId(),
-                users.getName(),
-                users.getEmail(),
-                users.getCreatedAt(),
-                users.getModifiedAt()
-        );
+        return new UsersResponse(users);
     }
 
     @Transactional
