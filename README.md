@@ -225,3 +225,7 @@ Endpoint: DELETE /todos/{todoId}/comments/{commentId}
 Success Response (200 OK):
 
 Body: "댓글 삭제 성공"
+
+ERD
+
+<img width="864" height="513" alt="image" src="https://github.com/user-attachments/assets/b59bb8c7-5c38-4604-985b-8f90b25986b9" />
